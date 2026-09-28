@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPLG - Software & Game Innovation Hub</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Orbitron:wght@500;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        neonCyan: '#00f3ff',
+                        neonPurple: '#bf00ff',
+                        neonPink: '#ff007f',
+                        neonGreen: '#00ff66',
+                        darkBg: '#080811',
+                        cardBg: 'rgba(18, 18, 36, 0.75)'
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif'],
+                        fira: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #080811;
+            color: #e2e8f0;
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            cursor: none; /* Hide default cursor for custom trail */
+        }
+
+        /* Neon Glow Effects */
+        .text-glow-cyan {
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.7), 0 0 20px rgba(0, 243, 255, 0.5);
+        }
+        .text-glow-purple {
+            text-shadow: 0 0 10px rgba(191, 0, 255, 0.7), 0 0 20px rgba(191, 0, 255, 0.5);
+        }
+        .box-glow-cyan {
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3), inset 0 0 15px rgba(0, 243, 255, 0.15);
+            border: 1px solid rgba(0, 243, 255, 0.4);
+        }
+        .box-glow-purple {
+            box-shadow: 0 0 15px rgba(191, 0, 255, 0.3), inset 0 0 15px rgba(191, 0, 255, 0.15);
+            border: 1px solid rgba(191, 0, 255, 0.4);
+        }
+        .btn-glow {
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.8), 0 0 50px rgba(191, 0, 255, 0.6);
+            transform: translateY(-3px) scale(1.02);
+        }
+
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: rgba(15, 18, 38, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(0, 243, 255, 0.6);
+            transform: translateY(-8px) rotateX(3deg);
+            box-shadow: 0 15px 35px -10px rgba(0, 243, 255, 0.25);
+        }
+
+        /* Custom Cursor Canvas */
+        #cursor-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Canvas Particle Background */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Typing Blink Cursor */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 0.8s infinite;
+            color: #00f3ff;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080811;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00f3ff, #bf00ff);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="selection:bg-neonCyan selection:text-black">
+
+    <canvas id="cursor-canvas"></canvas>
+    <canvas id="bg-canvas"></canvas>
+
+    <header class="fixed top-0 left-0 w-full z-50 bg-[#080811]/70 backdrop-blur-md border-b border-white/10 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-neonCyan to-neonPurple flex items-center justify-center text-black font-orbitron font-extrabold text-xl shadow-[0_0_15px_rgba(0,243,255,0.6)] group-hover:rotate-12 transition-transform">
+                    P
+                </div>
+                <div>
+                    <span class="font-orbitron font-bold text-xl tracking-wider text-white group-hover:text-neonCyan transition-colors">PPLG</span>
+                    <span class="text-xs font-fira text-neonPurple block -mt-1">&lt;DEV_N_GIM/&gt;</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-8 font-poppins text-sm font-medium">
+                <a href="#hero" class="hover:text-neonCyan transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-neonCyan hover:after:w-full after:transition-all">Beranda</a>
+                <a href="#profil" class="hover:text-neonCyan transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-neonCyan hover:after:w-full after:transition-all">Profil & Keahlian</a>
+                <a href="#game-arena" class="hover:text-neonPurple transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-neonPurple hover:after:w-full after:transition-all flex items-center gap-1.5"><i class="fa-solid fa-gamepad text-neonPurple"></i> Game Arena</a>
+                <a href="#showcase" class="hover:text-neonCyan transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-neonCyan hover:after:w-full after:transition-all">Showcase</a>
+                <a href="#kontak" class="hover:text-neonCyan transition-colors py-1 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-neonCyan hover:after:w-full after:transition-all">Kontak</a>
+            </nav>
+
+            <!-- CTA Button -->
+            <a href="#game-arena" class="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-neonCyan to-neonPurple text-black font-orbitron font-bold text-xs px-5 py-2.5 rounded-lg btn-glow">
+                <i class="fa-solid fa-play"></i> MAIN GAME
+            </a>
+        </div>
+    </header>
+
+    <section id="hero" class="relative min-h-screen flex items-center justify-center pt-24 px-6 overflow-hidden">
+        <div class="max-w-5xl mx-auto text-center z-10">
+            <!-- Badge -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-neonCyan/30 mb-6 backdrop-blur-sm animate-pulse">
+                <span class="w-2 h-2 rounded-full bg-neonGreen shadow-[0_0_8px_#00ff66]"></span>
+                <span class="font-fira text-xs text-neonCyan tracking-wider uppercase">Generasi Software Architect & Game Dev</span>
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-4xl sm:text-6xl md:text-7xl font-orbitron font-extrabold text-white leading-tight tracking-wide mb-6">
+                PENGEMBANGAN PERANGKAT LUNAK & <span class="text-transparent bg-clip-text bg-gradient-to-r from-neonCyan via-neonPurple to-neonPink text-glow-cyan">GIM</span>
+            </h1>
+
+            <!-- Typing Animation Subtitle -->
+            <div class="font-fira text-lg sm:text-2xl text-slate-300 h-16 sm:h-12 mb-8 flex items-center justify-center">
+                <span id="typing-text" class="typing-cursor"></span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="#profil" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-neonCyan text-black font-orbitron font-bold text-sm tracking-wider btn-glow flex items-center justify-center gap-2">
+                    JELAJAHI KOMPETENSI <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="#game-arena" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-transparent border border-neonPurple/60 text-white hover:bg-neonPurple/10 font-orbitron font-bold text-sm tracking-wider transition-all duration-300 flex items-center justify-center gap-2 box-glow-purple">
+                    <i class="fa-solid fa-gamepad text-neonPurple text-lg"></i> UJI BUG SMASHER
+                </a>
+            </div>
+
+            <!-- Tech Stack Icons Banner -->
+            <div class="mt-16 pt-8 border-t border-white/10 flex flex-wrap justify-center items-center gap-8 sm:gap-12 opacity-70">
+                <div class="flex items-center gap-2 font-fira text-xs text-slate-400 hover:text-neonCyan transition-colors"><i class="fa-brands fa-react text-2xl text-neonCyan"></i> ReactJS</div>
+                <div class="flex items-center gap-2 font-fira text-xs text-slate-400 hover:text-neonCyan transition-colors"><i class="fa-brands fa-python text-2xl text-yellow-400"></i> Python</div>
+                <div class="flex items-center gap-2 font-fira text-xs text-slate-400 hover:text-neonCyan transition-colors"><i class="fa-brands fa-unity text-2xl text-white"></i> Unity 3D</div>
+                <div class="flex items-center gap-2 font-fira text-xs text-slate-400 hover:text-neonCyan transition-colors"><i class="fa-brands fa-js text-2xl text-yellow-300"></i> JavaScript</div>
+                <div class="flex items-center gap-2 font-fira text-xs text-slate-400 hover:text-neonCyan transition-colors"><i class="fa-solid fa-database text-2xl text-neonPurple"></i> MySQL/SQL</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="profil" class="py-24 px-6 relative z-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl sm:text-5xl font-orbitron font-bold text-white mb-4">
+                    MENGAPA MEMILIH <span class="text-neonCyan text-glow-cyan">PPLG?</span>
+                </h2>
+                <p class="text-slate-400 max-w-2xl mx-auto font-poppins">
+                    Jurusan unggulan yang mempersiapkan talenta digital handal di bidang Rekayasa Perangkat Lunak dan Pembuatan Game Digital Interaktif.
+                </p>
+            </div>
+
+            <!-- Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Card 1 -->
+                <div class="glass-card p-8 flex flex-col group">
+                    <div class="w-14 h-14 rounded-2xl bg-neonCyan/10 border border-neonCyan/30 flex items-center justify-center text-neonCyan text-2xl mb-6 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(0,243,255,0.2)]">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <h3 class="font-orbitron font-bold text-xl text-white mb-3 group-hover:text-neonCyan transition-colors">Software Engineering</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-grow">
+                        Mempelajari algoritma, arsitektur perangkat lunak, OOP, serta pembuatan aplikasi Desktop dan Mobile modern.
+                    </p>
+                    <div class="font-fira text-xs text-neonCyan flex items-center gap-2">
+                        <span>#CodeYourFuture</span>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-card p-8 flex flex-col group">
+                    <div class="w-14 h-14 rounded-2xl bg-neonPurple/10 border border-neonPurple/30 flex items-center justify-center text-neonPurple text-2xl mb-6 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(191,0,255,0.2)]">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </div>
+                    <h3 class="font-orbitron font-bold text-xl text-white mb-3 group-hover:text-neonPurple transition-colors">Game Development</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-grow">
+                        Merancang mekanisme game, desain Karakter 2D/3D, audio, logika skrip game, hingga merilis game multiplatform.
+                    </p>
+                    <div class="font-fira text-xs text-neonPurple flex items-center gap-2">
+                        <span>#IndieGameDev</span>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-card p-8 flex flex-col group">
+                    <div class="w-14 h-14 rounded-2xl bg-neonPink/10 border border-neonPink/30 flex items-center justify-center text-neonPink text-2xl mb-6 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(255,0,127,0.2)]">
+                        <i class="fa-solid fa-globe"></i>
+                    </div>
+                    <h3 class="font-orbitron font-bold text-xl text-white mb-3 group-hover:text-neonPink transition-colors">Fullstack Web</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-grow">
+                        Menguasai teknologi Front-End & Back-End mutakhir, REST API, Cloud Deployment, dan keamanan aplikasi web.
+                    </p>
+                    <div class="font-fira text-xs text-neonPink flex items-center gap-2">
+                        <span>#FullstackMastery</span>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="glass-card p-8 flex flex-col group">
+                    <div class="w-14 h-14 rounded-2xl bg-neonGreen/10 border border-neonGreen/30 flex items-center justify-center text-neonGreen text-2xl mb-6 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(0,255,102,0.2)]">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h3 class="font-orbitron font-bold text-xl text-white mb-3 group-hover:text-neonGreen transition-colors">AI & Database</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-grow">
+                        Manajemen basis data relasional/NoSQL serta integrasi kecerdasan buatan (Machine Learning / AI API) ke dalam sistem.
+                    </p>
+                    <div class="font-fira text-xs text-neonGreen flex items-center gap-2">
+                        <span>#DataAndAI</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="game-arena" class="py-24 px-6 relative z-10 bg-black/40">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-10">
+                <span class="px-4 py-1 rounded-full bg-neonPurple/20 text-neonPurple font-fira text-xs tracking-widest uppercase border border-neonPurple/40">Interactive Sandbox</span>
+                <h2 class="text-3xl sm:text-5xl font-orbitron font-bold text-white mt-3">
+                    MINI GAME: <span class="text-neonPurple text-glow-purple">BUG SMASHER</span>
+                </h2>
+                <p class="text-slate-400 text-sm mt-2 font-poppins">
+                    Selesaikan bug kode sebanyak mungkin sebelum waktu habis! Klik/Tap bug (🐛) untuk membasminya.
+                </p>
+            </div>
+
+            <!-- Game Board Container -->
+            <div class="glass-card p-6 md:p-8 box-glow-purple relative overflow-hidden">
+                <!-- Dashboard Control -->
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6 bg-black/50 p-4 rounded-xl border border-white/10 font-orbitron">
+                    <div class="flex items-center gap-6">
+                        <div>
+                            <span class="text-slate-400 text-xs block">SKOR</span>
+                            <span id="game-score" class="text-2xl font-bold text-neonCyan">0</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 text-xs block">WAKTU</span>
+                            <span id="game-timer" class="text-2xl font-bold text-neonPink">30s</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 text-xs block">HIGHSCORE</span>
+                            <span id="game-highscore" class="text-2xl font-bold text-neonGreen">0</span>
+                        </div>
+                    </div>
+                    <button id="start-game-btn" onclick="startGame()" class="px-6 py-2.5 bg-gradient-to-r from-neonPurple to-neonPink text-white font-bold text-xs rounded-lg btn-glow tracking-wider uppercase">
+                        <i class="fa-solid fa-play mr-2"></i> Mulai Game
+                    </button>
+                </div>
+
+                <!-- Canvas / Playing Field -->
+                <div id="game-container" class="relative w-full h-[360px] bg-[#0c0c1a] rounded-xl border border-white/10 overflow-hidden flex items-center justify-center">
+                    <div id="game-overlay" class="text-center p-6 z-20">
+                        <i class="fa-solid fa-bug text-6xl text-neonPurple mb-4 animate-bounce"></i>
+                        <h3 class="text-2xl font-orbitron font-bold text-white mb-2">Siap Membasmi Bug?</h3>
+                        <p class="text-slate-400 text-sm max-w-md mb-6 font-fira">Tekan tombol 'Mulai Game' di atas untuk memulai sesi debug 30 detik!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="showcase" class="py-24 px-6 relative z-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16">
+                <div>
+                    <h2 class="text-3xl sm:text-5xl font-orbitron font-bold text-white">
+                        KARYA <span class="text-neonCyan text-glow-cyan">SISWA PPLG</span>
+                    </h2>
+                    <p class="text-slate-400 text-sm mt-2">Inovasi nyata hasil karya praktek siswa PPLG.</p>
+                </div>
+            </div>
+
+            <!-- Project Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Project 1 -->
+                <div class="glass-card overflow-hidden group">
+                    <div class="h-48 bg-gradient-to-br from-cyan-900/40 to-purple-900/40 relative flex items-center justify-center overflow-hidden">
+                        <i class="fa-solid fa-vr-cardboard text-6xl text-neonCyan/40 group-hover:scale-125 group-hover:text-neonCyan transition-all duration-500"></i>
+                        <span class="absolute top-3 right-3 px-3 py-1 bg-black/60 rounded-full font-fira text-xs text-neonCyan border border-neonCyan/30">Unity 3D</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-orbitron font-bold text-lg text-white mb-2 group-hover:text-neonCyan transition-colors">Cyberpunk RPG Horizon</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed mb-4">
+                            Game action RPG 3D bertema masa depan dengan grafis futuristik dan soundtrack sintetis.
+                        </p>
+                        <a href="#showcase" onclick="alert('Project Preview Modal Loading...')" class="inline-flex items-center text-xs font-fira text-neonCyan hover:underline gap-1">Detail Project <i class="fa-solid fa-chevron-right text-[10px]"></i></a>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="glass-card overflow-hidden group">
+                    <div class="h-48 bg-gradient-to-br from-purple-900/40 to-pink-900/40 relative flex items-center justify-center overflow-hidden">
+                        <i class="fa-solid fa-school text-6xl text-neonPurple/40 group-hover:scale-125 group-hover:text-neonPurple transition-all duration-500"></i>
+                        <span class="absolute top-3 right-3 px-3 py-1 bg-black/60 rounded-full font-fira text-xs text-neonPurple border border-neonPurple/30">Laravel & React</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-orbitron font-bold text-lg text-white mb-2 group-hover:text-neonPurple transition-colors">Smart School Ecosystem</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed mb-4">
+                            Aplikasi manajemen sekolah terpadu dengan absensi facial recognition & portal ujian online.
+                        </p>
+                        <a href="#showcase" onclick="alert('Project Preview Modal Loading...')" class="inline-flex items-center text-xs font-fira text-neonPurple hover:underline gap-1">Detail Project <i class="fa-solid fa-chevron-right text-[10px]"></i></a>
+                    </div>
+                </div>
+
+                <!-- Project 3 -->
+                <div class="glass-card overflow-hidden group">
+                    <div class="h-48 bg-gradient-to-br from-emerald-900/40 to-cyan-900/40 relative flex items-center justify-center overflow-hidden">
+                        <i class="fa-solid fa-mobile-screen-button text-6xl text-neonGreen/40 group-hover:scale-125 group-hover:text-neonGreen transition-all duration-500"></i>
+                        <span class="absolute top-3 right-3 px-3 py-1 bg-black/60 rounded-full font-fira text-xs text-neonGreen border border-neonGreen/30">Flutter</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-orbitron font-bold text-lg text-white mb-2 group-hover:text-neonGreen transition-colors">EcoTrack Mobile App</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed mb-4">
+                            Aplikasi pelacak jejak karbon harian dengan tantangan gamifikasi lingkungan.
+                        </p>
+                        <a href="#showcase" onclick="alert('Project Preview Modal Loading...')" class="inline-flex items-center text-xs font-fira text-neonGreen hover:underline gap-1">Detail Project <i class="fa-solid fa-chevron-right text-[10px]"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="kontak" class="py-16 px-6 border-t border-white/10 relative z-10 bg-[#05050b]">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+            <div class="md:col-span-2">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-neonCyan to-neonPurple flex items-center justify-center text-black font-orbitron font-bold">
+                        P
+                    </div>
+                    <span class="font-orbitron font-bold text-lg text-white">PPLG INNOVATION HUB</span>
+                </div>
+                <p class="text-slate-400 text-sm max-w-sm mb-6 leading-relaxed">
+                    Menciptakan talenta pengembang perangkat lunak dan kreator game masa depan yang berdaya saing global.
+                </p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-neonCyan hover:border-neonCyan transition-all"><i class="fa-brands fa-github text-lg"></i></a>
+                    <a href="#" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-neonPurple hover:border-neonPurple transition-all"><i class="fa-brands fa-instagram text-lg"></i></a>
+                    <a href="#" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-neonPink hover:border-neonPink transition-all"><i class="fa-brands fa-youtube text-lg"></i></a>
+                    <a href="#" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-neonGreen hover:border-neonGreen transition-all"><i class="fa-brands fa-discord text-lg"></i></a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-orbitron font-bold text-white text-sm mb-4">NAVIGASI</h4>
+                <ul class="space-y-2 text-sm text-slate-400 font-poppins">
+                    <li><a href="#hero" class="hover:text-neonCyan transition-colors">Beranda</a></li>
+                    <li><a href="#profil" class="hover:text-neonCyan transition-colors">Profil Keahlian</a></li>
+                    <li><a href="#game-arena" class="hover:text-neonCyan transition-colors">Mini Game</a></li>
+                    <li><a href="#showcase" class="hover:text-neonCyan transition-colors">Project Showcase</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-orbitron font-bold text-white text-sm mb-4">KONTAK</h4>
+                <ul class="space-y-2 text-sm text-slate-400 font-fira">
+                    <li><i class="fa-solid fa-envelope text-neonCyan mr-2"></i> pplg@labschool.sch.id</li>
+                    <li><i class="fa-solid fa-phone text-neonPurple mr-2"></i> +62 812-3456-7890</li>
+                    <li><i class="fa-solid fa-location-dot text-neonPink mr-2"></i> Lab PPLG, Building C</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 font-fira text-xs text-slate-500">
+            <p>&copy; 2026 PPLG Studio. All rights reserved.</p>
+            <p class="flex items-center gap-1">Designed with <i class="fa-solid fa-heart text-neonPink"></i> & Code</p>
+        </div>
+    </footer>
+
+    <script>
+        /* --- 1. LONG GLOWING TRAIL CURSOR CANVAS --- */
+        const cursorCanvas = document.getElementById('cursor-canvas');
+        const ctxCursor = cursorCanvas.getContext('2d');
+
+        function resizeCursorCanvas() {
+            cursorCanvas.width = window.innerWidth;
+            cursorCanvas.height = window.innerHeight;
+        }
+        resizeCursorCanvas();
+        window.addEventListener('resize', resizeCursorCanvas);
+
+        let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        let trail = [];
+        const maxTrailLength = 35; // Panjang ekor kursor
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        // Add touch support for mobile trail
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                mouse.x = e.touches[0].clientX;
+                mouse.y = e.touches[0].clientY;
+            }
+        });
+
+        function animateCursor() {
+            ctxCursor.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
+
+            // Append current mouse pos to trail
+            trail.push({ x: mouse.x, y: mouse.y });
+            if (trail.length > maxTrailLength) {
+                trail.shift();
+            }
+
+            // Draw glowing smooth trail line
+            if (trail.length > 1) {
+                for (let i = 1; i < trail.length; i++) {
+                    const ratio = i / trail.length;
+                    ctxCursor.beginPath();
+                    ctxCursor.moveTo(trail[i - 1].x, trail[i - 1].y);
+                    ctxCursor.lineTo(trail[i].x, trail[i].y);
+                    
+                    // Gradient color along the tail (Cyan to Purple to Magenta)
+                    ctxCursor.strokeStyle = `rgba(${Math.floor(0 + ratio * 191)}, ${Math.floor(243 - ratio * 243)}, 255, ${ratio})`;
+                    ctxCursor.lineWidth = ratio * 8 + 1;
+                    ctxCursor.lineCap = 'round';
+                    ctxCursor.shadowColor = '#00f3ff';
+                    ctxCursor.shadowBlur = ratio * 15;
+                    ctxCursor.stroke();
+                }
+            }
+
+            // Draw Cursor Head Glow
+            ctxCursor.beginPath();
+            ctxCursor.arc(mouse.x, mouse.y, 6, 0, Math.PI * 2);
+            ctxCursor.fillStyle = '#ffffff';
+            ctxCursor.shadowColor = '#00f3ff';
+            ctxCursor.shadowBlur = 20;
+            ctxCursor.fill();
+
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+
+        /* --- 2. BACKGROUND STARFIELD & CONNECTING MESH PARTICLES --- */
+        const bgCanvas = document.getElementById('bg-canvas');
+        const ctxBg = bgCanvas.getContext('2d');
+
+        function resizeBgCanvas() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+        }
+        resizeBgCanvas();
+        window.addEventListener('resize', resizeBgCanvas);
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * bgCanvas.width;
+                this.y = Math.random() * bgCanvas.height;
+                this.vx = (Math.random() - 0.5) * 0.6;
+                this.vy = (Math.random() - 0.5) * 0.6;
+                this.radius = Math.random() * 2 + 0.5;
+                this.color = Math.random() > 0.5 ? '#00f3ff' : '#bf00ff';
+                this.alpha = Math.random() * 0.6 + 0.2;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > bgCanvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > bgCanvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctxBg.beginPath();
+                ctxBg.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctxBg.fillStyle = this.color;
+                ctxBg.globalAlpha = this.alpha;
+                ctxBg.fill();
+            }
+        }
+
+        const particles = Array.from({ length: 60 }, () => new Particle());
+
+        function animateBg() {
+            ctxBg.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+            // Draw line connections between nearby particles
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 120) {
+                        ctxBg.beginPath();
+                        ctxBg.moveTo(particles[i].x, particles[i].y);
+                        ctxBg.lineTo(particles[j].x, particles[j].y);
+                        ctxBg.strokeStyle = particles[i].color;
+                        ctxBg.globalAlpha = (1 - dist / 120) * 0.15;
+                        ctxBg.lineWidth = 0.8;
+                        ctxBg.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+
+        /* --- 3. TYPEWRITER EFFECT --- */
+        const phrases = [
+            "Welcoming future software developers...",
+            "Building next-gen 3D & 2D games...",
+            "Mastering Web, Mobile & Cloud Tech...",
+            "Code. Create. Innovate with PPLG."
+        ];
+        let pIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typingElement = document.getElementById('typing-text');
+
+        function typeLoop() {
+            const currentPhrase = phrases[pIndex];
+            
+            if (isDeleting) {
+                typingElement.textContent = currentPhrase.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typingElement.textContent = currentPhrase.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            let typeSpeed = isDeleting ? 40 : 80;
+
+            if (!isDeleting && charIndex === currentPhrase.length) {
+                typeSpeed = 2000; // Pause at end of text
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                pIndex = (pIndex + 1) % phrases.length;
+                typeSpeed = 400;
+            }
+
+            setTimeout(typeLoop, typeSpeed);
+        }
+        typeLoop();
+
+
+        /* --- 4. MINI GAME "BUG SMASHER" LOGIC --- */
+        let gameScore = 0;
+        let highScore = 0;
+        let gameTimeLeft = 30;
+        let gameInterval = null;
+        let bugSpawnInterval = null;
+        let isGameRunning = false;
+
+        const gameContainer = document.getElementById('game-container');
+        const scoreEl = document.getElementById('game-score');
+        const timerEl = document.getElementById('game-timer');
+        const highScoreEl = document.getElementById('game-highscore');
+        const overlayEl = document.getElementById('game-overlay');
+
+        function startGame() {
+            if (isGameRunning) return;
+
+            // Reset Game State
+            isGameRunning = true;
+            gameScore = 0;
+            gameTimeLeft = 30;
+            scoreEl.textContent = gameScore;
+            timerEl.textContent = gameTimeLeft + 's';
+            overlayEl.style.display = 'none';
+
+            // Clear previous bugs if any
+            const existingBugs = gameContainer.querySelectorAll('.bug-item');
+            existingBugs.forEach(b => b.remove());
+
+            // Timer Loop
+            gameInterval = setInterval(() => {
+                gameTimeLeft--;
+                timerEl.textContent = gameTimeLeft + 's';
+
+                if (gameTimeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            // Spawn Bug Interval
+            bugSpawnInterval = setInterval(spawnBug, 700);
+        }
+
+        function spawnBug() {
+            if (!isGameRunning) return;
+
+            const bug = document.createElement('div');
+            bug.className = 'bug-item absolute cursor-pointer select-none text-3xl sm:text-4xl transition-transform hover:scale-125';
+            bug.innerHTML = '🐛';
+
+            // Random Position inside container
+            const maxX = gameContainer.clientWidth - 50;
+            const maxY = gameContainer.clientHeight - 50;
+            const posX = Math.max(10, Math.floor(Math.random() * maxX));
+            const posY = Math.max(10, Math.floor(Math.random() * maxY));
+
+            bug.style.left = posX + 'px';
+            bug.style.top = posY + 'px';
+
+            // Click Handler to Smash Bug
+            bug.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                gameScore += 10;
+                scoreEl.textContent = gameScore;
+
+                // Visual Spark Particle Effect on smash
+                createHitFx(posX + 15, posY + 15);
+
+                bug.remove();
+            });
+
+            gameContainer.appendChild(bug);
+
+            // Auto remove bug after 2 seconds if not clicked
+            setTimeout(() => {
+                if (bug.parentNode) {
+                    bug.remove();
+                }
+            }, 1800);
+        }
+
+        function createHitFx(x, y) {
+            const fx = document.createElement('div');
+            fx.className = 'absolute font-fira font-bold text-xs text-neonGreen animate-ping pointer-events-none';
+            fx.textContent = '+10 FIXED!';
+            fx.style.left = x + 'px';
+            fx.style.top = y + 'px';
+            gameContainer.appendChild(fx);
+
+            setTimeout(() => fx.remove(), 600);
+        }
+
+        function endGame() {
+            isGameRunning = false;
+            clearInterval(gameInterval);
+            clearInterval(bugSpawnInterval);
+
+            if (gameScore > highScore) {
+                highScore = gameScore;
+                highScoreEl.textContent = highScore;
+            }
+
+            overlayEl.style.display = 'block';
+            overlayEl.innerHTML = `
+                <i class="fa-solid fa-trophy text-6xl text-yellow-400 mb-4 animate-bounce"></i>
+                <h3 class="text-3xl font-orbitron font-bold text-white mb-2">Sesi Debug Selesai!</h3>
+                <p class="text-neonCyan font-fira text-lg mb-4">Total Bug Ditingkatkan: ${gameScore} poin</p>
+                <button onclick="startGame()" class="px-8 py-3 bg-neonCyan text-black font-orbitron font-bold rounded-xl btn-glow">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> Main Lagi
+                </button>
+            `;
+        }
+    </script>
+</body>
+</html>
